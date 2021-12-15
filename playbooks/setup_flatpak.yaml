@@ -1,0 +1,27 @@
+- name: Make {{ flatpak.name }} flatpak {{ flatpak.state }} {{ 'using ' + flatpak.remote + ' remote' if flatpak.state == 'present' }}
+  community.general.flatpak:
+    name: "{{ flatpak.name }}"
+    state: "{{ flatpak.state }}"
+    method: "{{ flatpak.method }}"
+    remote: "{{ flatpak.remote }}"
+
+- name: Make symbolic links for {{ flatpak.name }} {{ flatpak.state }} in {{ lookup('env','HOME') }}/.local/bin/
+  ansible.builtin.file:
+    src: "{{ lookup('vars', flatpak.method) if flatpak.state == 'present' }}"
+    dest: "{{ lookup('env','HOME') }}/.local/bin/{{ cmd }}"
+    state: "{{ 'link' if flatpak.state == 'present' else 'absent' }}"
+    follow: no
+  vars:
+    system: "/var/lib/flatpak/app/{{ flatpak.name }}/current/active/export/bin/{{ flatpak.name }}"
+    user: "{{ lookup('env','HOME') }}/.local/share/flatpak/app/{{ flatpak.name }}/current/active/export/bin/{{ flatpak.name }}"
+  loop: "{{ flatpak.cmds | default([]) }}"
+  loop_control:
+    loop_var: cmd
+
+- name: Create override for {{ flatpak.name }} flatpak
+  ansible.builtin.shell:
+    cmd: "flatpak override --{{ override.scope }} {{ override.name }} {{ flatpak.name }}"
+  changed_when: false
+  loop: "{{ flatpak.overrides | default([]) }}"
+  loop_control:
+    loop_var: override

@@ -1,0 +1,26 @@
+- hosts: localhost
+  connection: local
+  vars:
+     config:
+       flatpak: "{{ lookup('file', 'configs/flatpak.yaml') | from_yaml }}"
+       toolbox: "{{ lookup('file', 'configs/toolbox.yaml') | from_yaml }}"
+
+  tasks:
+     - name: Ensure directory {{ lookup('env','HOME') }}/.local/bin exists
+       ansible.builtin.file:
+         path: "{{ lookup('env','HOME') }}/.local/bin"
+         state: directory
+         mode: '0755'
+
+     - name: Add flatpak remotes
+       community.general.flatpak_remote:
+         name: "{{ item.name }}"
+         state: "{{ item.state }}"
+         method: "{{ item.method }}"
+         flatpakrepo_url: "{{ item.flatpakrepo_url }}"
+       loop: "{{ config.flatpak.remotes }}"
+
+     - include_tasks: playbooks/setup_flatpak.yaml
+       loop: "{{ config.flatpak.flatpaks }}"
+       loop_control:
+         loop_var: flatpak

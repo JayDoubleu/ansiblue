@@ -1,0 +1,4 @@
+- name: fedora-toolbox-35
+  image: registry.fedoraproject.org/fedora-toolbox:35
+  config:
+    packages: "{{ (lookup('file', 'common_packages_dnf.yaml') | from_yaml).values() | flatten | sort | unique }}"
