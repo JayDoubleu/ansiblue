@@ -40,6 +40,7 @@ flatpaks:
     cmds: [vi, vim, nvim]
     overrides:
       - { name: "--filesystem=/tmp", scope: user }
+      - { name: "--env=TERM=xterm-256color", scope: user }
 
   - name: com.github.tchx84.Flatseal
     state: present
