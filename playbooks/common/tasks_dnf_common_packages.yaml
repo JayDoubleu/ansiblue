@@ -1,0 +1,11 @@
+- name: Install common software {{ task_identifier }}
+  dnf:
+    state: present
+    name:
+      - zsh
+      - git
+      - dnf-plugins-core
+      - axel
+      - curl
+      - htop
+      - mlocate

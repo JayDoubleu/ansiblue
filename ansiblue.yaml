@@ -1,9 +1,10 @@
 - hosts: localhost
   connection: local
   vars:
+     ansible_remote_tmp: /tmp
      config:
-       flatpak: "{{ lookup('file', 'configs/flatpak.yaml') | from_yaml }}"
-       toolbox: "{{ lookup('file', 'configs/toolbox.yaml') | from_yaml }}"
+       flatpak: "{{ lookup('template', 'configs/flatpak.yaml') | from_yaml }}"
+       toolbox: "{{ lookup('template', 'configs/toolbox.yaml') | from_yaml }}"
 
   tasks:
      - name: Ensure directory {{ lookup('env','HOME') }}/.local/bin exists
@@ -11,6 +12,7 @@
          path: "{{ lookup('env','HOME') }}/.local/bin"
          state: directory
          mode: '0755'
+       tags: [always]
 
      - name: Add flatpak remotes
        community.general.flatpak_remote:
@@ -19,8 +21,24 @@
          method: "{{ item.method }}"
          flatpakrepo_url: "{{ item.flatpakrepo_url }}"
        loop: "{{ config.flatpak.remotes }}"
+       tags: [flatpak]
 
-     - include_tasks: playbooks/setup_flatpak.yaml
+     - name: Setup flatpaks
+       include_tasks: playbooks/setup/setup_flatpak.yaml
+       tags: [always]
+       args:
+         apply:
+           tags: [flatpak]
        loop: "{{ config.flatpak.flatpaks }}"
        loop_control:
          loop_var: flatpak
+
+     - name: Create and configure toolbox
+       include_tasks: playbooks/setup/setup_toolbox.yaml
+       tags: [always]
+       args:
+         apply:
+           tags: [toolbox, "{{ toolbox.name }}"]
+       loop: "{{ config.toolbox }}"
+       loop_control:
+         loop_var: toolbox

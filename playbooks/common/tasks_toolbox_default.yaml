@@ -1,0 +1,9 @@
+- name: Setup user {{ task_identifier }}
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    home: "{{ toolbox.user.homedir | default(ansible_user_dir) }}"
+    shell: "{{ toolbox.user.shell | default('/bin/bash')}}"
+    groups: "{{ toolbox.user.groups | default()}}"
+    append: yes
+    create_home: yes
+    state: present

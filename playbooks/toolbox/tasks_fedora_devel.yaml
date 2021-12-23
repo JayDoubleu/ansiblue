@@ -1,0 +1,36 @@
+- name: Install flatpak {{ task_identifier }}
+  ansible.builtin.dnf:
+    state: present
+    name: flatpak
+  register: flatpak_toolbox_install
+  failed_when: false
+
+- name: Install and manage copr repositories {{ task_identifier }}
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: "{{ copr.state }}"
+    name: "{{ copr.name }}"
+  loop:
+    - { name: 'otaylor/flatpak-module-tools-experimental', state: enabled }
+  loop_control:
+    loop_var: copr
+
+- name: Install software {{ task_identifier }}
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - '@Development tools'
+      - flatpak-module-tools
+
+- name: Ensure group "mock" exists {{ task_identifier }}
+  ansible.builtin.group:
+    name: mock
+    state: present
+
+- name: Make users passwordless for sudo in group wheel {{ task_identifier }}
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
