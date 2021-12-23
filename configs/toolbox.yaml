@@ -1,4 +1,18 @@
 - name: fedora-toolbox-35
   image: registry.fedoraproject.org/fedora-toolbox:35
-  config:
-    packages: "{{ (lookup('file', 'common_packages_dnf.yaml') | from_yaml).values() | flatten | sort | unique }}"
+  tasks: 
+    - playbooks/common/tasks_toolbox_default.yaml
+    - playbooks/common/tasks_dnf_full_upgrade.yaml
+    - playbooks/common/tasks_dnf_common_packages.yaml
+
+- name: fedora-devel
+  image: registry.fedoraproject.org/fedora-toolbox:34
+  user:
+    homedir: "{{ ansible_user_dir }}/.homedirs/fedora-devel"
+    shell: /bin/zsh
+    groups: wheel,mock
+  tasks: 
+    - playbooks/common/tasks_toolbox_default.yaml
+    - playbooks/common/tasks_dnf_full_upgrade.yaml
+    - playbooks/common/tasks_dnf_common_packages.yaml
+    - playbooks/toolbox/tasks_fedora_devel.yaml

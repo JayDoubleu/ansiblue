@@ -1,0 +1,38 @@
+- name: Ensure {{ toolbox.name }} toolbox is created and started
+  shell: "{{ toolbox_bootstrap }}"
+  register: toolbox_create
+  changed_when: false
+  failed_when:
+    - toolbox_create.rc == 1
+    - "'already exists' not in toolbox_create.stderr"
+  loop:
+    - toolbox create --image {{ toolbox.image }} {{ toolbox.name }}
+    - podman start {{ toolbox.name }}
+  loop_control:
+    loop_var: toolbox_bootstrap
+
+- name: Gather container {{ toolbox.name }} facts
+  containers.podman.podman_container_info:
+    name: ["{{ toolbox.name }}"]
+  register: toolbox_facts
+
+- name: Add container {{ toolbox.name }} as ansible host
+  ansible.builtin.add_host:
+    name: "{{ (toolbox_facts.containers | first).Name }}"
+    ansible_host: "{{ (toolbox_facts.containers | first).Id }}"
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_connection: podman
+    groups: toolbox
+  changed_when: false
+
+- name: Execute tasks on {{ toolbox.name }} toolbox container
+  delegate_to: "{{ toolbox.name }}"
+  delegate_facts: true
+  block:
+    - name: Run tasks on {{ toolbox.name }} container
+      include_tasks: "{{ task }}"
+      loop: "{{ toolbox.tasks }}"
+      loop_control:
+        loop_var: task
+      vars:
+        task_identifier: "(Toolbox: {{ toolbox.name }})"
