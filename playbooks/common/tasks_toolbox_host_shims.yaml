@@ -1,0 +1,14 @@
+- name: Copy host-runner to container {{ task_identifier }}
+  ansible.builtin.copy:
+    src: templates/host-runner.sh
+    dest: /usr/local/bin/host-runner
+    mode: a+x
+
+- name: Create host-runner symbolic links {{ task_identifier }}
+  ansible.builtin.file:
+    src: /usr/local/bin/host-runner
+    dest: /usr/local/bin/{{ executable }}
+    state: link
+  loop: "{{ toolbox.shims | default([]) }}"
+  loop_control:
+    loop_var: executable

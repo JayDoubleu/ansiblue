@@ -1,3 +1,17 @@
+- set_fact:
+    user_groups: "{{ toolbox.user.groups.split(',') }}"
+  when:
+    - "'user' in toolbox"
+    - "'groups' in toolbox.user"
+
+- name: Setup groups {{ task_identifier }}
+  ansible.builtin.group:
+    name: "{{ user_group }}"
+    state: present
+  loop: "{{ hostvars[toolbox.name]['user_groups'] | default([]) }}"
+  loop_control:
+    loop_var: user_group
+
 - name: Setup user {{ task_identifier }}
   ansible.builtin.user:
     name: "{{ ansible_user_id }}"

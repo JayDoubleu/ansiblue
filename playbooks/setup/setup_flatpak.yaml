@@ -5,12 +5,11 @@
     method: "{{ flatpak.method }}"
     remote: "{{ flatpak.remote }}"
 
-- name: Make symbolic links for {{ flatpak.name }} {{ flatpak.state }} in {{ lookup('env','HOME') }}/.local/bin/
-  ansible.builtin.file:
-    src: "{{ lookup('vars', flatpak.method) if flatpak.state == 'present' }}"
+- name: Make local bin wrapper {{ flatpak.name }} {{ flatpak.state }} in {{ lookup('env','HOME') }}/.local/bin/
+  ansible.builtin.copy:
+    content: "{{ lookup('file', lookup('vars', flatpak.method)) | replace('/usr/bin/', '')}}"
     dest: "{{ lookup('env','HOME') }}/.local/bin/{{ cmd }}"
-    state: "{{ 'link' if flatpak.state == 'present' else 'absent' }}"
-    follow: no
+    mode: a+x
   vars:
     system: "/var/lib/flatpak/app/{{ flatpak.name }}/current/active/export/bin/{{ flatpak.name }}"
     user: "{{ lookup('env','HOME') }}/.local/share/flatpak/app/{{ flatpak.name }}/current/active/export/bin/{{ flatpak.name }}"

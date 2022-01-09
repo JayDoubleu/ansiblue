@@ -1,12 +1,23 @@
 - name: fedora-toolbox-35
   image: registry.fedoraproject.org/fedora-toolbox:35
+  shims:
+    - flatpak
+    - systemctl
+    - rpm-ostree
+    - podman
   tasks: 
     - playbooks/common/tasks_toolbox_default.yaml
     - playbooks/common/tasks_dnf_full_upgrade.yaml
     - playbooks/common/tasks_dnf_common_packages.yaml
+    - playbooks/common/tasks_toolbox_host_shims.yaml
 
 - name: fedora-devel
   image: registry.fedoraproject.org/fedora-toolbox:34
+  shims:
+    - flatpak
+    - systemctl
+    - rpm-ostree
+    - podman
   user:
     homedir: "{{ ansible_user_dir }}/.homedirs/fedora-devel"
     shell: /bin/zsh
@@ -15,4 +26,5 @@
     - playbooks/common/tasks_toolbox_default.yaml
     - playbooks/common/tasks_dnf_full_upgrade.yaml
     - playbooks/common/tasks_dnf_common_packages.yaml
+    - playbooks/common/tasks_toolbox_host_shims.yaml
     - playbooks/toolbox/tasks_fedora_devel.yaml
