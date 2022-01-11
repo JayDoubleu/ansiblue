@@ -9,3 +9,6 @@
       - curl
       - htop
       - mlocate
+      - mesa-dri-drivers
+      - vulkan-loader
+      - bind-utils
