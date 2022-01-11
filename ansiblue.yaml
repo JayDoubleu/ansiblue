@@ -2,6 +2,7 @@
   connection: local
   vars:
      ansible_remote_tmp: /tmp
+     ansiblue_dir: "{{ playbook_dir }}"
      config:
        flatpak: "{{ lookup('template', 'configs/flatpak.yaml') | from_yaml }}"
        toolbox: "{{ lookup('template', 'configs/toolbox.yaml') | from_yaml }}"

@@ -42,3 +42,9 @@
     src: templates/docker.sh
     dest: "{{ ansible_user_dir }}/.local/bin/docker"
     mode: a+x
+
+- name: Download jq {{ task_identifier }}
+  get_url:
+    url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    dest: "{{ ansible_user_dir }}/.local/bin/jq"
+    mode: a+x

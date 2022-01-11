@@ -11,6 +11,8 @@
   loop:
     - { name: podman-compose, state: present }
     - { name: azure-cli, state: present }
+    - { name: yapf, state: present }
+    - { name: requests, state: present }
     - { name: pip, state: latest }
   loop_control:
     loop_var: pip_package

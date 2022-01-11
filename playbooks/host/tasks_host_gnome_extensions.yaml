@@ -1,0 +1,43 @@
+- name: Determine if gnome extension is already installed {{ task_identifier }}
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/share/gnome-shell/extensions/{{ extension.uuid }}"
+  loop: "{{ host.gnome_extensions }}"
+  loop_control:
+    loop_var: extension
+  register: gnome_extensions_stat
+
+- name: Get gnome extension download urls {{ task_identifier }}
+  ansible.builtin.script: 
+    cmd: > 
+      get-gnome-extension-url.py
+      --extension-uuid "{{ gnome_extension.extension.uuid }}"
+      --gnome-version "{{ gnome_extension.extension.gnome_version }}"
+  args:
+    executable: /usr/bin/python3
+  when: not gnome_extension.stat.exists
+  loop: "{{ gnome_extensions_stat.results }}"
+  loop_control:
+    loop_var: gnome_extension
+    label: {'uuid': '{{ gnome_extension.extension.uuid }}'}
+  register: gnome_extension_download_urls
+
+- name: Download gnome shell extensions {{ task_identifier }}
+  ansible.builtin.get_url:
+    url: "{{  (extension_url.stdout | from_json).download_url }}"
+    dest: "/tmp/{{ extension_url.gnome_extension.extension.uuid }}.zip"
+  when: not extension_url.gnome_extension.stat.exists
+  loop: "{{ gnome_extension_download_urls.results }}"
+  loop_control:
+    loop_var: extension_url
+    label: {'uuid': '{{ extension_url.gnome_extension.extension.uuid }}'}
+  register: gnome_extension_zips
+
+- name: Install gnome shell extensions {{ task_identifier }}
+  ansible.builtin.shell:
+    cmd: /usr/bin/gnome-extensions install {{ extension_install.dest }}
+  when:
+    - not extension_install.extension_url.gnome_extension.stat.exists
+  loop: "{{ gnome_extension_zips.results }}"
+  loop_control:
+    loop_var: extension_install
+    label: {'uuid': '{{ extension_install.extension_url.gnome_extension.extension.uuid }}'}

@@ -20,6 +20,11 @@ flatpaks:
     method: system
     remote: fedora
 
+  - name: org.gnome.Extensions
+    state: present
+    method: system
+    remote: fedora
+
   - name: org.gnome.TextEditor
     state: present
     method: user

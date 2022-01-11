@@ -1,4 +1,10 @@
-- name: Install overlay packages {{ task_identifier }}
+- name: Add tailscale repository {{ task_identifier }}
+  get_url:
+    url: https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+    dest: /etc/yum.repos.d/tailscale.repo
+  become: yes
+
+- name: Manage overlay packages {{ task_identifier }}
   community.general.rpm_ostree_pkg:
     name: "{{ rpm_ostree_pkg.name }}"
     state: "{{ rpm_ostree_pkg.state }}"
@@ -6,5 +12,14 @@
     - { name: file-roller, state: present }
     - { name: langpacks-en, state: present }
     - { name: podman-docker, state: present }
+    - { name: tailscale, state: present }
   loop_control:
     loop_var: rpm_ostree_pkg
+    label: {'name': '{{ rpm_ostree_pkg.name }}', 'state': '{{ rpm_ostree_pkg.state }}'}
+  register: rpm_ostree_pkg_install
+
+- name: rpm-ostree apply-live {{ task_identifier }}
+  ansible.builtin.shell:
+    cmd: rpm-ostree ex apply-live
+  become: yes
+  when: rpm_ostree_pkg_install.changed

@@ -1,7 +1,11 @@
 - name: thinkXPS
+  gnome_extensions:
+    - { uuid: 'caffeine@patapon.info', gnome_version: '41', enabled: yes }
+    - { uuid: 'clipboard-indicator@tudmotu.com', gnome_version: '41', enabled: yes }
   tasks: 
     - playbooks/host/tasks_host_default.yaml
     - playbooks/host/tasks_host_dconf.yaml
     - playbooks/host/tasks_host_rpm_ostree.yaml
     - playbooks/host/tasks_host_systemd.yaml
     - playbooks/host/tasks_host_python.yaml
+    - playbooks/host/tasks_host_gnome_extensions.yaml
