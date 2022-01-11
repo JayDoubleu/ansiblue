@@ -15,6 +15,11 @@ remotes:
     method: user
 
 flatpaks:
+  - name: org.gnome.FileRoller
+    state: absent
+    method: system
+    remote: fedora
+
   - name: org.gnome.TextEditor
     state: present
     method: user
@@ -61,3 +66,9 @@ flatpaks:
     method: user
     remote: flathub
     cmds: [riot, element]
+
+  - name: com.usebottles.bottles
+    state: present
+    method: user
+    remote: flathub
+    cmds: [bottles]

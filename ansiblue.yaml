@@ -5,6 +5,7 @@
      config:
        flatpak: "{{ lookup('template', 'configs/flatpak.yaml') | from_yaml }}"
        toolbox: "{{ lookup('template', 'configs/toolbox.yaml') | from_yaml }}"
+       host: "{{ lookup('template', 'configs/host.yaml') | from_yaml }}"
 
   tasks:
      - name: Ensure directory {{ lookup('env','HOME') }}/.local/bin exists
@@ -42,3 +43,13 @@
        loop: "{{ config.toolbox }}"
        loop_control:
          loop_var: toolbox
+
+     - name: Configure host
+       include_tasks: playbooks/setup/setup_host.yaml
+       tags: [always]
+       args:
+         apply:
+           tags: [host]
+       loop: "{{ config.host }}"
+       loop_control:
+         loop_var: host

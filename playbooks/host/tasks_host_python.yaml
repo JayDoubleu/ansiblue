@@ -1,0 +1,16 @@
+- name: Install poetry {{ task_identifier }}
+  ansible.builtin.shell:
+    cmd: curl -sSL https://install.python-poetry.org | python3 -
+    creates: "{{ ansible_user_dir }}/.local/bin/poetry"
+
+- name: Install local pip packages {{ task_identifier }}
+  ansible.builtin.pip:
+    name: "{{ pip_package.name }}"
+    state: "{{ pip_package.state }}"
+    extra_args:  --user
+  loop:
+    - { name: podman-compose, state: present }
+    - { name: azure-cli, state: present }
+    - { name: pip, state: latest }
+  loop_control:
+    loop_var: pip_package

@@ -1,0 +1,9 @@
+- name: Execute tasks on {{ host.name }} host
+  block:
+    - name: Run tasks on {{ host.name }} host
+      include_tasks: "{{ task }}"
+      loop: "{{ host.tasks }}"
+      loop_control:
+        loop_var: task
+      vars:
+        task_identifier: "(Host: {{ host.name }})"

@@ -1,0 +1,21 @@
+- name: Enable and start user systemd services {{ task_identifier }}
+  ansible.builtin.systemd:
+    name: "{{ user_systemd_services.name }}"
+    state: "{{ user_systemd_services.state }}"
+    enabled: "{{ user_systemd_services.enabled }}"
+    scope: user
+  loop:
+    - { name: podman.socket, state: started, enabled: yes }
+  loop_control:
+    loop_var: user_systemd_services
+
+- name: Enable and start system systemd services {{ task_identifier }}
+  ansible.builtin.systemd:
+    name: "{{ systemd_services.name }}"
+    state: "{{ systemd_services.state }}"
+    enabled: "{{ systemd_services.enabled }}"
+    scope: system
+  loop:
+    - { name: sshd.service, state: started, enabled: yes }
+  loop_control:
+    loop_var: systemd_services

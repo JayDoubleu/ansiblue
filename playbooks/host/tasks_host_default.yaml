@@ -1,0 +1,44 @@
+- name: Set a hostname to {{ host.name }} {{ task_identifier }}
+  ansible.builtin.hostname:
+    name: "{{ host.name }}"
+    use: systemd
+
+- name: Create directories {{ task_identifier }}
+  ansible.builtin.file:
+    path: "{{ directory.path }}"
+    state: directory
+    mode: "{{ directory.mode }}"
+  loop:
+    - { path: "{{ ansible_user_dir }}/.config/user-tmpfiles.d", mode: "0755" }
+  loop_control:
+    loop_var: directory
+
+- name: Download oh-my-zsh {{ task_identifier }}
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: "{{ ansible_user_dir }}/.oh-my-zsh"
+    single_branch: yes
+    version: master
+
+- name: Copy .zshrc template {{ task_identifier }}
+  ansible.builtin.template:
+    src: templates/zshrc.zsh-template
+    dest: "{{ ansible_user_dir }}/.zshrc"
+
+- name: Add git settings to ~/.gitconfig {{ task_identifier }}
+  community.general.git_config:
+    name: "{{ git_config.name }}"
+    scope: "{{ git_config.scope }}"
+    value: "{{ git_config.value }}"
+  loop:
+    - { name: core.editor, scope: global, value: vi }
+    - { name: user.name, scope: global, value: Jay W }
+    - { name: user.email, scope: global, value: git.jaydoubleu@gmail.com }
+  loop_control:
+    loop_var: git_config
+
+- name: Create podman-docker wrapper {{ task_identifier }}
+  ansible.builtin.copy:
+    src: templates/docker.sh
+    dest: "{{ ansible_user_dir }}/.local/bin/docker"
+    mode: a+x
