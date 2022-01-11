@@ -35,7 +35,7 @@ flatpaks:
 
   - name: io.neovim.nvim
     state: present
-    method: system
+    method: user
     remote: flathub
     cmds: [vi, vim, nvim]
     overrides:
@@ -44,11 +44,20 @@ flatpaks:
 
   - name: com.github.tchx84.Flatseal
     state: present
-    method: system
+    method: user
     remote: flathub
 
   - name: com.brave.Browser
     state: present
-    method: system
+    method: user
     remote: flathub-beta
     cmds: [brave]
+    overrides:
+      - { name: "--filesystem=~/.local/share/applications", scope: user }
+      - { name: "--filesystem=~/.local/share/icons", scope: user }
+
+  - name: im.riot.Riot
+    state: present
+    method: user
+    remote: flathub
+    cmds: [riot, element]

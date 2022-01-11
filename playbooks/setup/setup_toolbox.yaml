@@ -3,10 +3,10 @@
   register: toolbox_create
   changed_when: false
   failed_when:
-    - toolbox_create.rc == 1
+    - toolbox_create.rc != 0
     - "'already exists' not in toolbox_create.stderr"
   loop:
-    - toolbox create --image {{ toolbox.image }} {{ toolbox.name }}
+    - toolbox create --image {{ toolbox.image }} {{ toolbox.name }} -y
     - podman start {{ toolbox.name }}
   loop_control:
     loop_var: toolbox_bootstrap
