@@ -1,0 +1,10 @@
+- name: Install overlay packages {{ task_identifier }}
+  community.general.rpm_ostree_pkg:
+    name: "{{ rpm_ostree_pkg.name }}"
+    state: "{{ rpm_ostree_pkg.state }}"
+  loop:
+    - { name: file-roller, state: present }
+    - { name: langpacks-en, state: present }
+    - { name: podman-docker, state: present }
+  loop_control:
+    loop_var: rpm_ostree_pkg

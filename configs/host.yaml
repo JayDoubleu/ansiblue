@@ -1,0 +1,7 @@
+- name: thinkXPS
+  tasks: 
+    - playbooks/host/tasks_host_default.yaml
+    - playbooks/host/tasks_host_dconf.yaml
+    - playbooks/host/tasks_host_rpm_ostree.yaml
+    - playbooks/host/tasks_host_systemd.yaml
+    - playbooks/host/tasks_host_python.yaml
