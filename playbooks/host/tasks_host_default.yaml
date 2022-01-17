@@ -3,6 +3,19 @@
     name: "{{ host.name }}"
     use: systemd
 
+- name: Gather the package facts {{ task_identifier }} 
+  ansible.builtin.package_facts:
+    manager: auto
+
+- set_fact:
+    gnome_shell_current_major: "{{ ((ansible_facts.packages['gnome-shell'] | first).version).split('.') | first }}"
+
+- name: Create empty vmbr0 bridge {{ task_identifier }}
+  community.general.nmcli:
+    type: bridge
+    conn_name: vmbr0
+    state: present
+
 - name: Create directories {{ task_identifier }}
   ansible.builtin.file:
     path: "{{ directory.path }}"

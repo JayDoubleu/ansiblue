@@ -2,18 +2,6 @@
   community.general.dconf:
     key: "{{ dconf_conf.key }}"
     value: "{{ dconf_conf.value | string }}"
-  loop:
-    - { key: '/org/gnome/desktop/interface/gtk-theme', value: '''Adwaita-dark''' }
-    - { key: '/org/gnome/desktop/sound/allow-volume-above-100-percent', value: 'true' }
-    - { key: '/org/gnome/desktop/interface/clock-format', value: '24' }
-    - { key: '/org/gnome/desktop/peripherals/touchpad/disable-while-typing', value: 'true' }
-    - { key: '/org/gnome/desktop/interface/show-battery-percentage', value: 'true' }
-    - { key: '/org/gnome/desktop/interface/clock-show-weekday', value: 'true' }
-    - { key: '/org/gnome/desktop/interface/clock-show-seconds', value: 'true' }
-    - { key: '/org/gnome/desktop/calendar/show-weekdate', value: 'true' }
-    - { key: '/org/gnome/desktop/wm/preferences/button-layout', value: '''appmenu:minimize,maximize,close''' }
-    - { key: '/org/gnome/desktop/wm/preferences/focus-mode', value: '''sloppy''' }
-    - { key: '/org/gnome/desktop/peripherals/touchpad/natural-scroll', value: 'false' }
-    - { key: '/org/gnome/desktop/peripherals/touchpad/tap-to-click', value: 'true' }
+  loop: "{{ host.gnome.dconf }}"
   loop_control:
     loop_var: dconf_conf

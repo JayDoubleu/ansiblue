@@ -9,6 +9,7 @@
     name: "{{ rpm_ostree_pkg.name }}"
     state: "{{ rpm_ostree_pkg.state }}"
   loop:
+    - { name: bridge-utils, state: absent }
     - { name: file-roller, state: present }
     - { name: langpacks-en, state: present }
     - { name: podman-docker, state: present }

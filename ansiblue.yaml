@@ -34,6 +34,7 @@
        loop: "{{ config.flatpak.flatpaks }}"
        loop_control:
          loop_var: flatpak
+         label: "{{ flatpak.name }}"
 
      - name: Create and configure toolbox
        include_tasks: playbooks/setup/setup_toolbox.yaml
@@ -44,6 +45,7 @@
        loop: "{{ config.toolbox }}"
        loop_control:
          loop_var: toolbox
+         label: "{{ toolbox.name }}"
 
      - name: Configure host
        include_tasks: playbooks/setup/setup_host.yaml
@@ -54,3 +56,4 @@
        loop: "{{ config.host }}"
        loop_control:
          loop_var: host
+         label: "{{ host.name }}"
