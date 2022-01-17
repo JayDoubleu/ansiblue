@@ -1,0 +1,11 @@
+- name: Dconf configuration {{ task_identifier }}
+  community.general.dconf:
+    key: "{{ dconf_conf.key }}"
+    value: "{{ formatted_value }}"
+  vars:
+    formatted_value: >-
+      {% if dconf_conf.single_quoted is defined and dconf_conf.single_quoted == True %}'{{ dconf_conf.value }}'{% else %}{{ dconf_conf.value }}{% endif %}
+  loop: "{{ host.gnome.dconf }}"
+  loop_control:
+    loop_var: dconf_conf
+    label: "{'key': {{ dconf_conf.key }}, 'value': {{ formatted_value }} }"

@@ -1,11 +1,21 @@
 - name: thinkXPS
-  gnome_extensions:
-    - { uuid: 'caffeine@patapon.info', gnome_version: '41', enabled: yes }
-    - { uuid: 'clipboard-indicator@tudmotu.com', gnome_version: '41', enabled: yes }
   tasks: 
     - playbooks/host/tasks_host_default.yaml
-    - playbooks/host/tasks_host_dconf.yaml
     - playbooks/host/tasks_host_rpm_ostree.yaml
     - playbooks/host/tasks_host_systemd.yaml
     - playbooks/host/tasks_host_python.yaml
     - playbooks/host/tasks_host_gnome_extensions.yaml
+    - playbooks/host/tasks_host_gnome_dconf.yaml
+
+  layered_packages:
+    - { name: file-roller, state: present }
+    - { name: langpacks-en, state: present }
+    - { name: podman-docker, state: present }
+    - { name: tailscale, state: present }
+  local_packages:
+    - { name: jq, source: github, repo: stedolan/jq, release: latest, asset: jq-linux64 }
+    - { name: yq, source: github, repo: mikefarah/yq, release: latest, asset: yq_linux_amd64 }
+    - { name: bicep, source: github, repo: Azure/bicep, release: latest, asset: bicep-linux-x64 } 
+  gnome:
+    extensions: {{ lookup('template', 'configs/host_gnome_extensions.yaml') | from_yaml }}
+    dconf: {{ lookup('template', 'configs/host_gnome_dconf.yaml') | from_yaml }}

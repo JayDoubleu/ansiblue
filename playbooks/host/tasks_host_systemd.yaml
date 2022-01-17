@@ -18,6 +18,5 @@
   become: yes
   loop:
     - { name: sshd.service, state: started, enabled: yes }
-    - { name: tailscaled.service, state: started, enabled: yes }
   loop_control:
     loop_var: systemd_services

@@ -1,7 +1,7 @@
 - name: Determine if gnome extension is already installed {{ task_identifier }}
   ansible.builtin.stat:
     path: "{{ ansible_user_dir }}/.local/share/gnome-shell/extensions/{{ extension.uuid }}"
-  loop: "{{ host.gnome_extensions }}"
+  loop: "{{ host.gnome.extensions | selectattr('gnome_version', 'defined') }}"
   loop_control:
     loop_var: extension
   register: gnome_extensions_stat
@@ -11,15 +11,18 @@
     cmd: > 
       get-gnome-extension-url.py
       --extension-uuid "{{ gnome_extension.extension.uuid }}"
-      --gnome-version "{{ gnome_extension.extension.gnome_version }}"
+      --gnome-version "{{ gnome_shell_current_major if gnome_extension.extension.gnome_version == 'current' else gnome_extension.extension.gnome_version }}"
   args:
     executable: /usr/bin/python3
   when: not gnome_extension.stat.exists
+  register: gnome_extension_download_urls
+  retries: 5
+  delay: 5
+  until: gnome_extension_download_urls.rc == 0
   loop: "{{ gnome_extensions_stat.results }}"
   loop_control:
     loop_var: gnome_extension
     label: {'uuid': '{{ gnome_extension.extension.uuid }}'}
-  register: gnome_extension_download_urls
 
 - name: Download gnome shell extensions {{ task_identifier }}
   ansible.builtin.get_url:
@@ -41,3 +44,15 @@
   loop_control:
     loop_var: extension_install
     label: {'uuid': '{{ extension_install.extension_url.gnome_extension.extension.uuid }}'}
+
+- name: Enable gnome shell extensions {{ task_identifier }}
+  community.general.dconf:
+    key: '/org/gnome/shell/enabled-extensions'
+    value: "{{ host.gnome.extensions | selectattr('enabled', 'equalto', True) | map(attribute='uuid') | string }}"
+    state: present
+
+- name: Disable gnome shell extensions {{ task_identifier }}
+  community.general.dconf:
+    key: '/org/gnome/shell/disabled-extensions'
+    value: "{{ host.gnome.extensions | selectattr('enabled', 'equalto', False) | map(attribute='uuid') | string }}"
+    state: present

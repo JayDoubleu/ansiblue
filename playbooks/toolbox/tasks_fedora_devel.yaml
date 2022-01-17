@@ -3,6 +3,8 @@
     host: copr.fedorainfracloud.org
     state: "{{ copr.state }}"
     name: "{{ copr.name }}"
+  when:
+    - ansible_distribution_version == '34'
   loop:
     - { name: 'otaylor/flatpak-module-tools-experimental', state: enabled }
   loop_control:
@@ -11,11 +13,14 @@
 - name: Install software {{ task_identifier }}
   ansible.builtin.dnf:
     state: present
-    name:
-      - '@Development tools'
-      - '@RPM Development Tools'
-      - flatpak-module-tools
-      - nosync
+    name: [
+      '@Development tools', '@RPM Development Tools', flatpak-module-tools, nosync,
+      meson, gettext, glib2-devel, gcc, gcc-c++, git, desktop-file-utils, gperf,
+      pkgconfig(gtk+-3.0), libappstream-glib, pkgconfig(vte-2.91), pkgconfig(libgtop-2.0),
+      pkgconfig(fribidi), pkgconfig(gnutls), pkgconfig(libsystemd), pkgconfig(libpcre2-8),
+      pkgconfig(gsettings-desktop-schemas), pkgconfig(gladeui-2.0), pkgconfig(libnautilus-extension),
+      sassc, cmake, libhandy, libhandy-devel, gtk4, gtk4-devel, gtk4-devel-tools, gtk3, gtk3-devel,
+      libadwaita, libadwaita-devel, desktop-file-utils, vte291, vte291-devel, automake, gettext-devel, glib-devel   ]
 
 - name: Make users passwordless for sudo in group wheel {{ task_identifier }}
   lineinfile:
@@ -24,8 +29,3 @@
     regexp: '^%wheel'
     line: '%wheel ALL=(ALL) NOPASSWD: ALL'
     validate: 'visudo -cf %s'
-
-- name: Install multi python packages with version specifiers
-  ansible.builtin.pip:
-    name:
-      - rpmfluff

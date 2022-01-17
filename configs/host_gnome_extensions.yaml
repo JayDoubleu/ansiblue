@@ -1,0 +1,10 @@
+# Do not define "gnome_version" if extension is pre-installed or installed via rpm-ostree
+# extensions without "gnome_version" will only action "disable" and "enable" extension tasks.
+# Set "gnome_version" to "current" if you want to use your currently installed version.
+# Setting "gnome_version" to "current" might break if extension is not published for your version.
+- { uuid: "background-logo@fedorahosted.org", enabled: no }
+- { uuid: "user-theme@gnome-shell-extensions.gcampax.github.com", gnome_version: current, enabled: yes }
+- { uuid: "caffeine@patapon.info", gnome_version: current, enabled: yes }
+- { uuid: "clipboard-indicator@tudmotu.com", gnome_version: current, enabled: yes }
+- { uuid: "trayIconsReloaded@selfmade.pl", gnome_version: current, enabled: yes }
+- { uuid: "dash-to-panel@jderose9.github.com", gnome_version: "41", enabled: yes }

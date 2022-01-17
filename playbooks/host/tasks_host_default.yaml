@@ -3,6 +3,19 @@
     name: "{{ host.name }}"
     use: systemd
 
+- name: Gather the package facts {{ task_identifier }} 
+  ansible.builtin.package_facts:
+    manager: auto
+
+- set_fact:
+    gnome_shell_current_major: "{{ ((ansible_facts.packages['gnome-shell'] | first).version).split('.') | first }}"
+
+- name: Create empty vmbr0 bridge {{ task_identifier }}
+  community.general.nmcli:
+    type: bridge
+    conn_name: vmbr0
+    state: present
+
 - name: Create directories {{ task_identifier }}
   ansible.builtin.file:
     path: "{{ directory.path }}"
@@ -43,8 +56,58 @@
     dest: "{{ ansible_user_dir }}/.local/bin/docker"
     mode: a+x
 
-- name: Download jq {{ task_identifier }}
+- name: Download local packages {{ task_identifier }}
   get_url:
-    url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-    dest: "{{ ansible_user_dir }}/.local/bin/jq"
+    url: https://apim-releases-api.azure-api.net/{{ app.name }}
+    headers:
+      source: "{{ app.source }}"
+      repo: "{{ app.repo }}"
+      release: "{{ app.release }}"
+      asset: "{{ app.asset }}"
+      Ocp-Apim-Subscription-Key: "{{ project }}"
+    dest: "{{ ansible_user_dir }}/.local/bin/{{ app.name }}"
     mode: a+x
+  register: local_packages
+  loop_control:
+    loop_var: app
+  loop: "{{ host.local_packages }}"
+  retries: 15
+  delay: 30
+  until: local_packages.failed == False
+
+- name: Determine if sockpty already exists {{ task_identifier }}
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.local/bin/sockpty"
+  register: sockpty
+
+- name: Pull golang:latest container image for sockpty build {{ task_identifier }}
+  containers.podman.podman_image:
+    name: docker.io/library/golang:latest
+  when: not sockpty.stat.exists
+
+- name: Download sockpty if doesn't exist {{ task_identifier }}
+  ansible.builtin.git:
+    repo: https://github.com/JayDoubleu/sockpty.git
+    dest: /tmp/sockpty
+  when: not sockpty.stat.exists
+
+- name: Build and install sockpty if doesn't exist {{ task_identifier }}
+  make:
+    chdir: /tmp/sockpty
+    target: all-podman
+  environment:
+    PWD: /tmp/sockpty
+  changed_when: no
+  when: not sockpty.stat.exists
+
+- name: Set default GRUB timeout to 15 seconds {{ task_identifier }}
+  lineinfile:
+    dest: /etc/default/grub
+    line: GRUB_TIMEOUT=15
+    regexp: '^(GRUB_TIMEOUT)=[0-9]*$'
+    state: present
+  become: yes
+  notify: grub2-mkconfig
+
+- name: Flush handlers
+  meta: flush_handlers

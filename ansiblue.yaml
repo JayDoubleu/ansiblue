@@ -1,6 +1,7 @@
 - hosts: localhost
   connection: local
   vars:
+     project: ansiblue
      ansible_remote_tmp: /tmp
      ansiblue_dir: "{{ playbook_dir }}"
      config:
@@ -9,48 +10,57 @@
        host: "{{ lookup('template', 'configs/host.yaml') | from_yaml }}"
 
   tasks:
-     - name: Ensure directory {{ lookup('env','HOME') }}/.local/bin exists
-       ansible.builtin.file:
-         path: "{{ lookup('env','HOME') }}/.local/bin"
-         state: directory
-         mode: '0755'
-       tags: [always]
+    - name: Ensure directory {{ lookup('env','HOME') }}/.local/bin exists
+      ansible.builtin.file:
+        path: "{{ lookup('env','HOME') }}/.local/bin"
+        state: directory
+        mode: '0755'
+      tags: [always]
 
-     - name: Add flatpak remotes
-       community.general.flatpak_remote:
-         name: "{{ item.name }}"
-         state: "{{ item.state }}"
-         method: "{{ item.method }}"
-         flatpakrepo_url: "{{ item.flatpakrepo_url }}"
-       loop: "{{ config.flatpak.remotes }}"
-       tags: [flatpak]
+    - name: Add flatpak remotes
+      community.general.flatpak_remote:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+        method: "{{ item.method }}"
+        flatpakrepo_url: "{{ item.flatpakrepo_url }}"
+      loop: "{{ config.flatpak.remotes }}"
+      tags: [flatpak]
 
-     - name: Setup flatpaks
-       include_tasks: playbooks/setup/setup_flatpak.yaml
-       tags: [always]
-       args:
-         apply:
-           tags: [flatpak]
-       loop: "{{ config.flatpak.flatpaks }}"
-       loop_control:
-         loop_var: flatpak
+    - name: Setup flatpaks
+      include_tasks: playbooks/setup/setup_flatpak.yaml
+      tags: [always]
+      args:
+        apply:
+          tags: [flatpak]
+      loop: "{{ config.flatpak.flatpaks }}"
+      loop_control:
+        loop_var: flatpak
+        label: "{{ flatpak.name }}"
 
-     - name: Create and configure toolbox
-       include_tasks: playbooks/setup/setup_toolbox.yaml
-       tags: [always]
-       args:
-         apply:
-           tags: [toolbox, "{{ toolbox.name }}"]
-       loop: "{{ config.toolbox }}"
-       loop_control:
-         loop_var: toolbox
+    - name: Create and configure toolbox
+      include_tasks: playbooks/setup/setup_toolbox.yaml
+      tags: [always]
+      args:
+        apply:
+          tags: [toolbox, "{{ toolbox.name }}"]
+      loop: "{{ config.toolbox }}"
+      loop_control:
+        loop_var: toolbox
+        label: "{{ toolbox.name }}"
 
-     - name: Configure host
-       include_tasks: playbooks/setup/setup_host.yaml
-       tags: [always]
-       args:
-         apply:
-           tags: [host]
-       loop: "{{ config.host }}"
-       loop_control:
-         loop_var: host
+    - name: Configure host
+      include_tasks: playbooks/setup/setup_host.yaml
+      tags: [always]
+      args:
+        apply:
+          tags: [host]
+      loop: "{{ config.host }}"
+      loop_control:
+        loop_var: host
+        label: "{{ host.name }}"
+
+  handlers:  
+    - name: grub2-mkconfig  
+      ansible.builtin.command:  
+        cmd: grub2-mkconfig -o /etc/grub2-efi.cfg
+      become: yes
